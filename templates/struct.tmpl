@@ -1,0 +1,14 @@
+package models
+
+import (
+	"github.com/jinzhu/gorm"
+)
+
+{{range .}}
+	type {{.TableName}} struct {
+	gorm.Models
+	{{range .Cols}}
+  	{{ .ColumnName }} {{ .ColumnType }}
+	{{- end}}
+	}
+{{end}}
