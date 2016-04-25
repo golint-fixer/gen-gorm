@@ -98,5 +98,5 @@ func TestProcessTemplates(t *testing.T) {
 	assert.True(t, f.Size() > 0, "file should not be empty")
 
 	// clean up
-	//os.RemoveAll(dir)
+	os.RemoveAll(dir)
 }
