@@ -11,6 +11,7 @@ import (
 	"unicode"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/kmulvey/gen-gorm/graph"
 
 	_ "github.com/lib/pq"
 )
@@ -30,8 +31,8 @@ func main() {
 	username := flag.String("username", "", "username")
 	password := flag.String("password", "", "password")
 	schema := flag.String("schema", "", "schema")
-	port := flag.String("port", "", "port")
-	output := flag.String("output", "", "output")
+	port := flag.String("port", "3306", "port")
+	//output := flag.String("output", "", "output")
 	flag.Parse()
 
 	// connect to db
@@ -46,10 +47,10 @@ func main() {
 	handleErr(err)
 
 	// get table structure from DB
-	data := getTableInfo(conn, *schema)
+	getTableInfo(conn, *schema)
 
 	// get 'er done
-	processTemplates(data, *output)
+	//processTemplates(data, *output)
 }
 
 // processTemplates fills in the templates with data, puts them in the output
@@ -82,20 +83,21 @@ func processTemplates(data []table, output string) {
 }
 
 // getTableInfo retrieves schema information from the database
-func getTableInfo(conn *sql.DB, schema string) []table {
-	var data []table
-	var tableID = 0
+func getTableInfo(conn *sql.DB, schema string) (database graph.Graph) {
+	database.Name = schema
+	database.Vertices = make(map[string]graph.Vertex)
 	// get table information
 	tables, err := conn.Query(fmt.Sprintf("SELECT table_name FROM information_schema.tables WHERE table_schema = '%v' ORDER BY table_name DESC;", schema))
 	handleErr(err)
 	for tables.Next() {
 		var tableName string
+		var table graph.Vertex
 		err = tables.Scan(&tableName)
 		handleErr(err)
+		table.Name = formatColName(tableName)
 
 		// get column information
-		var col []column
-		data = append(data, table{formatColName(tableName), col})
+		var cols = make(map[string]graph.Col)
 		columns, err := conn.Query(fmt.Sprintf("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%v' AND table_schema = '%v';", tableName, schema))
 		handleErr(err)
 
@@ -104,12 +106,29 @@ func getTableInfo(conn *sql.DB, schema string) []table {
 			var colType string
 			err = columns.Scan(&colName, &colType)
 			handleErr(err)
-			col = append(col, column{formatColName(colName), convertType(colType), colName})
+			cols[formatColName(colName)] = graph.Col{Name: formatColName(colName), Type: convertType(colType)}
 		}
-		data[tableID].Cols = col
-		tableID++
+		table.Cols = cols
+		database.Vertices[tableName] = table
 	}
-	return data
+	// get foreign key information
+	keys, err := conn.Query("SELECT TABLE_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA=? and REFERENCED_TABLE_NAME is not null", schema)
+	handleErr(err)
+	for keys.Next() {
+		var tableName string
+		var colName string
+		var refTableName string
+		var refColName string
+
+		err = keys.Scan(&tableName, &colName, &refTableName, &refColName)
+		handleErr(err)
+
+		var originTable = database.Vertices[formatColName(tableName)]
+		var destTable = database.Vertices[formatColName(refTableName)]
+		var e = graph.Edge{destTable, destTable.Cols[formatColName(refColName)], originTable.Cols[formatColName(colName)]}
+		originTable.Edges = append(originTable.Edges, e)
+	}
+	return database
 }
 
 // capFirst capitalized the first character of a string
