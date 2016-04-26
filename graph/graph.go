@@ -1,10 +1,26 @@
 package graph
 
+// Graph is a databse
 type Graph struct {
-	Vertices []Vertex
+	Vertices map[string]Vertex
+	Name     string
 }
 
+// Vertex is a table
 type Vertex struct {
 	Name  string
-	Edges []Vertex
+	Cols  map[string]Col
+	Edges []Edge
+}
+
+// Col is a column ... duh?!?
+type Col struct {
+	Name string
+	Type string
+}
+
+type Edge struct {
+	DestinationTable Vertex
+	DestinationCol   Col
+	OriginCol        Col
 }
