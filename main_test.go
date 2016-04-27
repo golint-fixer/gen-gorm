@@ -80,10 +80,13 @@ func TestGetTableInfo(t *testing.T) {
 		AddRow("id", "int").
 		AddRow("name", "varchar").
 		AddRow("user_id", "varchar")
+	foreignKeys := sqlmock.NewRows([]string{"TABLE_NAME", "COLUMN_NAME", "REFERENCED_TABLE_NAME", "REFERENCED_COLUMN_NAME"}).
+		AddRow("posts", "user_id", "users", "id")
+
 	mock.ExpectQuery("SELECT table_name FROM information_schema.tables").WillReturnRows(tableRows)
 	mock.ExpectQuery("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE").WillReturnRows(colRows)
 	mock.ExpectQuery("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE").WillReturnRows(colRowsTwo)
-	mock.ExpectQuery("SELECT TABLE_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE").WillReturnRows(colRowsTwo)
+	mock.ExpectQuery("SELECT TABLE_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE").WillReturnRows(foreignKeys)
 	data := getTableInfo(db, "some_schema")
 	assert.EqualValues(t, database, data, "should be equal")
 }
