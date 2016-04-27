@@ -17,7 +17,7 @@ script:
   - go test -v -parallel 10 -covermode=count -coverprofile=graph.coverage.out -coverpkg=./graph
   - go test -v -parallel 10 -covermode=count -coverprofile=util.coverage.out -coverpkg=./util
   - go test -v -parallel 10 -covermode=count -coverprofile=backends.coverage.out -coverpkg=./backends
-  - cat *.coverage.out | grep -v 'mode: count' >> coverage.out
+  - cat *.coverage.out | grep -v \"mode: count\" >> coverage.out
   - cat coverage.out
 
 after_success:
