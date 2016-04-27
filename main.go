@@ -32,7 +32,7 @@ func main() {
 	password := flag.String("password", "", "password")
 	schema := flag.String("schema", "", "schema")
 	port := flag.String("port", "3306", "port")
-	//output := flag.String("output", "", "output")
+	output := flag.String("output", "", "output")
 	flag.Parse()
 
 	// connect to db
@@ -47,15 +47,15 @@ func main() {
 	handleErr(err)
 
 	// get table structure from DB
-	getTableInfo(conn, *schema)
+	data := getTableInfo(conn, *schema)
 
 	// get 'er done
-	//processTemplates(data, *output)
+	processTemplates(data, *output)
 }
 
 // processTemplates fills in the templates with data, puts them in the output
 // directory and fmt them
-func processTemplates(data []table, output string) {
+func processTemplates(data graph.Graph, output string) {
 
 	// parse templates
 	structTemplate, err := template.ParseFiles("templates/struct.tmpl")
@@ -79,7 +79,6 @@ func processTemplates(data []table, output string) {
 	cmd := exec.Command("gofmt", "-w", output)
 	err = cmd.Run()
 	handleErr(err)
-
 }
 
 // getTableInfo retrieves schema information from the database
@@ -109,7 +108,7 @@ func getTableInfo(conn *sql.DB, schema string) (database graph.Graph) {
 			cols[formatColName(colName)] = graph.Col{Name: formatColName(colName), Type: convertType(colType)}
 		}
 		table.Cols = cols
-		database.Vertices[tableName] = table
+		database.Vertices[formatColName(tableName)] = table
 	}
 	// get foreign key information
 	keys, err := conn.Query("SELECT TABLE_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA=? and REFERENCED_TABLE_NAME is not null", schema)
