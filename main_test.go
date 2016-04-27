@@ -12,17 +12,17 @@ import (
 )
 
 var database = graph.Graph{Name: "some_schema", Vertices: map[string]graph.Vertex{
-	"Users": graph.Vertex{
+	"Users": {
 		Name: "Users", Cols: map[string]graph.Col{
-			"Id":   graph.Col{Name: "Id", Type: "int"},
-			"Name": graph.Col{Name: "Name", Type: "string"},
+			"Id":   {Name: "Id", Type: "int"},
+			"Name": {Name: "Name", Type: "string"},
 		},
 	},
-	"Posts": graph.Vertex{
+	"Posts": {
 		Name: "Posts", Cols: map[string]graph.Col{
-			"Id":     graph.Col{Name: "Id", Type: "int"},
-			"Name":   graph.Col{Name: "Name", Type: "string"},
-			"UserId": graph.Col{Name: "UserId", Type: "string"},
+			"Id":     {Name: "Id", Type: "int"},
+			"Name":   {Name: "Name", Type: "string"},
+			"UserId": {Name: "UserId", Type: "string"},
 		},
 	},
 },
