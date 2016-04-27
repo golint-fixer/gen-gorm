@@ -21,6 +21,8 @@ func CreateTables() {
 	if err != nil {
 		panic(err)
 	}
+	//db.Model(&User{}).AddForeignKey("profile_refer", "profile(id)", "RESTRICT", "RESTRICT")
+
 	db.AutoMigrate(&User{}, &Profile{})
 
 }
