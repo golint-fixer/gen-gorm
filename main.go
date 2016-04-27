@@ -124,7 +124,7 @@ func getTableInfo(conn *sql.DB, schema string) (database graph.Graph) {
 
 		var originTable = database.Vertices[formatColName(tableName)]
 		var destTable = database.Vertices[formatColName(refTableName)]
-		var e = graph.Edge{destTable, destTable.Cols[formatColName(refColName)], originTable.Cols[formatColName(colName)]}
+		var e = graph.Edge{DestinationTable: destTable, DestinationCol: destTable.Cols[formatColName(refColName)], OriginCol: originTable.Cols[formatColName(colName)]}
 		originTable.Edges = append(originTable.Edges, e)
 	}
 	return database
