@@ -19,6 +19,7 @@ type Col struct {
 	Type string
 }
 
+// Edge is a foreign key
 type Edge struct {
 	DestinationTable Vertex
 	DestinationCol   Col
