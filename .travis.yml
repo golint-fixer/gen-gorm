@@ -13,9 +13,9 @@ before_install:
 script: 
   - golint ./...
   - go vet ./...
-  - go test -v -covermode=count -coverprofile=coverage.out 
-#- go test -v -parallel 10 -covermode=count -coverprofile=coverage.out -coverpkg=./... 
-#  - echo "mode: set" > coverage.out && cat *.cover.out | grep -v mode: | sort -r | awk '{if($1 != last) {print $0;last=$1}}' >> coverage.out
+  - go test -v -parallel 10 -covermode=count -coverprofile=main.coverage.out -coverpkg=./
+  - go test -v -parallel 10 -covermode=count -coverprofile=graph.coverage.out -coverpkg=./graph
+  - cat *.coverage.out >> coverage.out
 
 after_success:
   - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken WVURXfIfQnohf4flfYJfa3haa9hwGwhU2
