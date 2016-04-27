@@ -13,15 +13,15 @@ import (
 var database = graph.Graph{Name: "some_schema", Vertices: map[string]graph.Vertex{
 	"Users": graph.Vertex{
 		Name: "Users", Cols: map[string]graph.Col{
-			"Id":   graph.Col{"Id", "int"},
-			"Name": graph.Col{"Name", "string"},
+			"Id":   graph.Col{Name: "Id", Type: "int"},
+			"Name": graph.Col{Name: "Name", Type: "string"},
 		},
 	},
 	"Posts": graph.Vertex{
 		Name: "Posts", Cols: map[string]graph.Col{
-			"Id":     graph.Col{"Id", "int"},
-			"Name":   graph.Col{"Name", "string"},
-			"UserId": graph.Col{"UserId", "string"},
+			"Id":     graph.Col{Name: "Id", Type: "int"},
+			"Name":   graph.Col{Name: "Name", Type: "string"},
+			"UserId": graph.Col{Name: "UserId", Type: "string"},
 		},
 	},
 },
