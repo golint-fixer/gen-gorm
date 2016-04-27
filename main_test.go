@@ -2,14 +2,29 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/kmulvey/gen-gorm/graph"
 	"github.com/stretchr/testify/assert"
 )
 
-var expected = []table{
-	{"Tableone", []column{{"Id", "int", "id"}, {"Name", "string", "name"}}},
-	{"Tabletwo", []column{{"Id", "int", "id"}, {"Name", "string", "name"}}},
+var database = graph.Graph{Name: "some_schema", Vertices: map[string]graph.Vertex{
+	"Users": graph.Vertex{
+		Name: "Users", Cols: map[string]graph.Col{
+			"Id":   graph.Col{"Id", "int"},
+			"Name": graph.Col{"Name", "string"},
+		},
+	},
+	"Posts": graph.Vertex{
+		Name: "Posts", Cols: map[string]graph.Col{
+			"Id":     graph.Col{"Id", "int"},
+			"Name":   graph.Col{"Name", "string"},
+			"UserId": graph.Col{"UserId", "string"},
+		},
+	},
+},
 }
 
 func TestConvertType(t *testing.T) {
@@ -44,7 +59,6 @@ func TestTormatColName(t *testing.T) {
 	assert.Equal(t, "Code", formatColName("code"), "should be Code")
 }
 
-/*
 func TestGetTableInfo(t *testing.T) {
 	t.Parallel()
 
@@ -56,22 +70,25 @@ func TestGetTableInfo(t *testing.T) {
 	}
 	// columns to be used for result
 	tableRows := sqlmock.NewRows([]string{"table_name"}).
-		AddRow("tableone").
-		AddRow("tabletwo")
+		AddRow("users").
+		AddRow("posts")
 	colRows := sqlmock.NewRows([]string{"COLUMN_NAME", "DATA_TYPE"}).
 		AddRow("id", "int").
 		AddRow("name", "varchar")
 	// you cant reuse mocked rows
 	colRowsTwo := sqlmock.NewRows([]string{"COLUMN_NAME", "DATA_TYPE"}).
 		AddRow("id", "int").
-		AddRow("name", "varchar")
+		AddRow("name", "varchar").
+		AddRow("user_id", "varchar")
 	mock.ExpectQuery("SELECT table_name FROM information_schema.tables").WillReturnRows(tableRows)
 	mock.ExpectQuery("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE").WillReturnRows(colRows)
 	mock.ExpectQuery("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE").WillReturnRows(colRowsTwo)
 	mock.ExpectQuery("SELECT TABLE_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE").WillReturnRows(colRowsTwo)
 	data := getTableInfo(db, "some_schema")
-	assert.EqualValues(t, expected, data, "should be equal")
+	assert.EqualValues(t, database, data, "should be equal")
 }
+
+/*
 
 func TestProcessTemplates(t *testing.T) {
 	t.Parallel()
