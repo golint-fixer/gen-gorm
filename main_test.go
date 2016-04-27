@@ -4,8 +4,26 @@ import (
 	"os"
 	"testing"
 
+	"github.com/kmulvey/gen-gorm/graph"
 	"github.com/stretchr/testify/assert"
 )
+
+var database = graph.Graph{Name: "some_schema", Vertices: map[string]graph.Vertex{
+	"Users": {
+		Name: "Users", Cols: map[string]graph.Col{
+			"Id":   {Name: "Id", Type: "int"},
+			"Name": {Name: "Name", Type: "string"},
+		},
+	},
+	"Posts": {
+		Name: "Posts", Cols: map[string]graph.Col{
+			"Id":     {Name: "Id", Type: "int"},
+			"Name":   {Name: "Name", Type: "string"},
+			"UserId": {Name: "UserId", Type: "string"},
+		},
+	},
+},
+}
 
 func TestProcessTemplates(t *testing.T) {
 	t.Parallel()
