@@ -4,11 +4,12 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-{{range .}}
-	type {{.TableName}} struct {
+
+{{range $key, $v := .Vertices}}
+	type {{$v.Name}} struct {
 	gorm.Models
-	{{range .Cols}}
-  	{{ .ColumnName }} {{ .ColumnType }}
+	{{range $key, $c := $v.Cols}}
+  	{{ $c.Name }} {{ $c.Type }}
 	{{- end}}
 	}
 {{end}}
