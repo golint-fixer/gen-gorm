@@ -58,7 +58,7 @@ func main() {
 func processTemplates(data graph.Graph, output string) {
 
 	// parse templates
-	structTemplate, err := template.ParseFiles("templates/struct.tmpl")
+	modelsTemplate, err := template.ParseFiles("templates/models.tmpl")
 	handleErr(err)
 
 	// create directory
@@ -67,12 +67,12 @@ func processTemplates(data graph.Graph, output string) {
 	}
 
 	// create the files
-	structGo, err := os.Create(output + "/struct.go")
+	modelsGo, err := os.Create(output + "/models.go")
 	handleErr(err)
-	defer structGo.Close()
+	defer modelsGo.Close()
 
 	// exec templates
-	err = structTemplate.Execute(structGo, data)
+	err = modelsTemplate.Execute(modelsGo, data)
 	handleErr(err)
 
 	// format the file
