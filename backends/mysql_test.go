@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/kmulvey/gen-gorm/graph"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 var database = graph.Graph{Name: "some_schema", Vertices: map[string]graph.Vertex{
