@@ -7,11 +7,13 @@ import (
 	"github.com/kmulvey/gen-gorm/graph"
 )
 
+// Backend is a database
 type Backend interface {
 	createModel() graph.Graph
 	createConn() *sql.DB
 }
 
+// ConnConfig db params
 type ConnConfig struct {
 	Hostname *string
 	Username *string

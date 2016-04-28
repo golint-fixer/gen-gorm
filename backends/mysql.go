@@ -9,6 +9,7 @@ import (
 	"github.com/kmulvey/gen-gorm/util"
 )
 
+// Mysql is what it sounds like
 type Mysql struct {
 	Backend
 	conn  *sql.DB
