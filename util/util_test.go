@@ -12,4 +12,8 @@ func TestHandleError(t *testing.T) {
 	assert.Panics(t, func() {
 		HandleErr(errors.New("some error"))
 	}, "Calling handleErr() should panic")
+
+	assert.NotPanics(t, func() {
+		HandleErr(nil)
+	}, "Calling handleErr() should not panic")
 }
