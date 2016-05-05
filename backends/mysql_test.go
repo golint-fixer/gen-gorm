@@ -26,7 +26,7 @@ var database = graph.Graph{Name: "some_schema", Vertices: map[string]*graph.Vert
 			"Name":   {Name: "Name", Type: "string", Key: ""},
 			"UserId": userID,
 		},
-		Edges: []graph.Edge{graph.Edge{&users, &id, &userID}},
+		Edges: []graph.Edge{graph.Edge{DestinationTable: &users, DestinationCol: &id, OriginCol: &userID}},
 	},
 },
 }
