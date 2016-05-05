@@ -8,19 +8,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var database = graph.Graph{Name: "some_schema", Vertices: map[string]graph.Vertex{
-	"Users": {
-		Name: "Users", Cols: map[string]graph.Col{
-			"Id":   {Name: "Id", Type: "int"},
-			"Name": {Name: "Name", Type: "string"},
-		},
+var users = graph.Vertex{
+	Name: "Users", HasMany: "Posts", Cols: map[string]graph.Col{
+		"Id":   {Name: "Id", Type: "int", Key: "PRI"},
+		"Name": {Name: "Name", Type: "string", Key: ""},
 	},
+}
+var id = graph.Col{Name: "Id", Type: "int", Key: "PRI"}
+var userID = graph.Col{Name: "UserId", Type: "int", Key: "MUL"}
+
+var database = graph.Graph{Name: "some_schema", Vertices: map[string]*graph.Vertex{
+	"Users": &users,
 	"Posts": {
-		Name: "Posts", Cols: map[string]graph.Col{
-			"Id":     {Name: "Id", Type: "int"},
-			"Name":   {Name: "Name", Type: "string"},
-			"UserId": {Name: "UserId", Type: "string"},
+		Name: "Posts", HasMany: "", Cols: map[string]graph.Col{
+			"Id":     id,
+			"Name":   {Name: "Name", Type: "string", Key: ""},
+			"UserId": userID,
 		},
+		Edges: []graph.Edge{graph.Edge{&users, &id, &userID}},
 	},
 },
 }
