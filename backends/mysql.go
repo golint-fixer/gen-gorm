@@ -22,7 +22,6 @@ func (m *Mysql) createConn(config ConnConfig) *sql.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//defer conn.Close()
 
 	err = conn.Ping()
 	util.HandleErr(err)

@@ -28,10 +28,12 @@ func GetTableInfo(config ConnConfig, engine string) graph.Graph {
 	case "mysql":
 		m := Mysql{}
 		conn := m.createConn(config)
+		defer conn.Close()
 		return m.createModel(conn, config)
 	default:
 		m := Mysql{}
 		conn := m.createConn(config)
+		defer conn.Close()
 		return m.createModel(conn, config)
 	}
 }
