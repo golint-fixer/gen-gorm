@@ -36,9 +36,6 @@ func main() {
 	engine := flag.String("engine", "", "engine")
 	flag.Parse()
 
-	// connect to db
-	//db, err := sql.Open("postgres", fmt.Sprintf("host=%v user=%v dbname=%v password=%v port=%v sslmode=disable", hostname, username, schema, password, port))
-
 	// get table structure from DB
 	data := backends.GetTableInfo(dbConfig, *engine)
 

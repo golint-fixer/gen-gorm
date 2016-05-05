@@ -8,7 +8,7 @@ import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
-func TestGetTableInfoMysql(t *testing.T) {
+func TestGetTableInfoPostgres(t *testing.T) {
 	t.Parallel()
 
 	// Open new mock database
