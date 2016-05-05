@@ -9,7 +9,16 @@ import (
 	type {{$v.Name}} struct {
 	gorm.Models
 	{{range $key, $c := $v.Cols}}
-  	{{ $c.Name }} {{ $c.Type }}
+		{{ $c.Name }} {{ $c.Type }}
 	{{- end}}
+
+	{{range $key, $e := $v.Edges}}
+		{{ $e.DestinationTable.Name }} {{ $e.DestinationTable.Name }} `gorm:"ForeignKey:{{ $e.OriginCol.Name }}`
+	{{- end}}
+	 
+	{{ if ne $v.HasMany "" }}
+		{{ $v.HasMany }} []{{ $v.HasMany }}
+	{{- end }}
+
 	}
 {{end}}
