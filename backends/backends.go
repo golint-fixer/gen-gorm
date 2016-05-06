@@ -2,6 +2,7 @@ package backends
 
 import (
 	"database/sql"
+	"log"
 	"unicode"
 
 	"github.com/kmulvey/gen-gorm/graph"
@@ -30,11 +31,14 @@ func GetTableInfo(config ConnConfig, engine string) graph.Graph {
 		conn := m.createConn(config)
 		defer conn.Close()
 		return m.createModel(conn, config)
-	default:
-		m := Mysql{}
-		conn := m.createConn(config)
+	case "postgres":
+		p := Postgres{}
+		conn := p.createConn(config)
 		defer conn.Close()
-		return m.createModel(conn, config)
+		return p.createModel(conn, config)
+	default:
+		log.Fatal("We dont support \"" + engine + "\" :(")
+		return graph.Graph{} // this is stupid
 	}
 }
 
