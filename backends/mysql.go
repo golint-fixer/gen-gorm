@@ -32,7 +32,7 @@ func (m *Mysql) createModel(conn *sql.DB, config ConnConfig) (database graph.Gra
 	database.Name = *config.Schema
 	database.Vertices = make(map[string]*graph.Vertex)
 	// get table information
-	tables, err := conn.Query(fmt.Sprintf("SELECT table_name FROM information_schema.tables WHERE table_schema = '%v' ORDER BY table_name DESC;", *config.Schema))
+	tables, err := conn.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = '%v' ORDER BY table_name DESC;", *config.Schema)
 	util.HandleErr(err)
 	for tables.Next() {
 		var tableName string
@@ -42,7 +42,7 @@ func (m *Mysql) createModel(conn *sql.DB, config ConnConfig) (database graph.Gra
 		table.Name = formatColName(tableName)
 		// get column information
 		var cols = make(map[string]graph.Col)
-		columns, err := conn.Query(fmt.Sprintf("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%v' AND table_schema = '%v';", tableName, *config.Schema))
+		columns, err := conn.Query("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%v' AND table_schema = '%v';", tableName, *config.Schema)
 		util.HandleErr(err)
 
 		for columns.Next() {
