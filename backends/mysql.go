@@ -3,8 +3,8 @@ package backends
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/kmulvey/gen-gorm/graph"
 	"github.com/kmulvey/gen-gorm/util"
 )
@@ -19,9 +19,7 @@ type Mysql struct {
 // createConn
 func (m *Mysql) createConn(config ConnConfig) *sql.DB {
 	conn, err := sql.Open("mysql", fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8", *config.Username, *config.Password, *config.Hostname, *config.Port, *config.Schema))
-	if err != nil {
-		log.Fatal(err)
-	}
+	util.HandleErr(err)
 
 	err = conn.Ping()
 	util.HandleErr(err)
