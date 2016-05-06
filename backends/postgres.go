@@ -7,6 +7,7 @@ import (
 
 	"github.com/kmulvey/gen-gorm/graph"
 	"github.com/kmulvey/gen-gorm/util"
+	_ "github.com/lib/pq"
 )
 
 // Postgres is what it sounds like
@@ -34,7 +35,7 @@ func (m *Postgres) createModel(conn *sql.DB, config ConnConfig) (database graph.
 	database.Name = *config.Schema
 	database.Vertices = make(map[string]*graph.Vertex)
 	// get table information
-	tables, err := conn.Query(fmt.Sprintf("SELECT table_name FROM information_schema.tables WHERE table_schema = '%v' ORDER BY table_name DESC;", *config.Schema))
+	tables, err := conn.Query("SELECT tablename FROM pg_catalog.pg_tables where tableowner=$1", *config.Username)
 	util.HandleErr(err)
 	for tables.Next() {
 		var tableName string
@@ -44,7 +45,7 @@ func (m *Postgres) createModel(conn *sql.DB, config ConnConfig) (database graph.
 		table.Name = formatColName(tableName)
 		// get column information
 		var cols = make(map[string]graph.Col)
-		columns, err := conn.Query(fmt.Sprintf("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%v' AND table_schema = '%v';", tableName, *config.Schema))
+		columns, err := conn.Query("select kc.column_name, c.data_type, tc.constraint_type from information_schema.table_constraints tc inner join information_schema.key_column_usage kc on kc.table_name = tc.table_name and kc.table_schema = tc.table_schema inner join information_schema.columns c on kc.column_name=c.column_name where tc.table_name=$1 and tc.table_catalog=$2", tableName, *config.Schema)
 		util.HandleErr(err)
 
 		for columns.Next() {
@@ -59,7 +60,27 @@ func (m *Postgres) createModel(conn *sql.DB, config ConnConfig) (database graph.
 		database.Vertices[formatColName(tableName)] = table
 	}
 	// get foreign key information
-	keys, err := conn.Query("SELECT TABLE_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA=? and REFERENCED_TABLE_NAME is not null", *config.Schema)
+	keys, err := conn.Query(`select 
+		tc.table_name,
+		kcu.column_name,
+		ccu.table_name AS references_table,
+		ccu.column_name AS references_field
+		FROM information_schema.table_constraints tc
+		LEFT JOIN information_schema.key_column_usage kcu
+		ON tc.constraint_catalog = kcu.constraint_catalog
+		AND tc.constraint_schema = kcu.constraint_schema
+		AND tc.constraint_name = kcu.constraint_name
+		LEFT JOIN information_schema.referential_constraints rc
+		ON tc.constraint_catalog = rc.constraint_catalog
+		AND tc.constraint_schema = rc.constraint_schema
+		AND tc.constraint_name = rc.constraint_name
+		LEFT JOIN information_schema.constraint_column_usage ccu
+		ON rc.unique_constraint_catalog = ccu.constraint_catalog
+		AND rc.unique_constraint_schema = ccu.constraint_schema
+		AND rc.unique_constraint_name = ccu.constraint_name
+		WHERE lower(tc.constraint_type) in ('foreign key')
+		and tc.table_catalog=$1`, *config.Schema)
+
 	util.HandleErr(err)
 	for keys.Next() {
 		var tableName string
@@ -74,7 +95,7 @@ func (m *Postgres) createModel(conn *sql.DB, config ConnConfig) (database graph.
 		var destTable = database.Vertices[formatColName(refTableName)]
 		var originKey = originTable.Cols[formatColName(colName)].Key
 
-		if originKey == "MUL" {
+		if originKey == "FOREIGN KEY" {
 			destTable.HasMany = originTable.Name
 		}
 
