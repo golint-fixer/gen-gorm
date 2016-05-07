@@ -7,6 +7,7 @@ import (
 
 	"github.com/kmulvey/gen-gorm/graph"
 	"github.com/kmulvey/gen-gorm/util"
+	// dear gofmt, this is needed
 	_ "github.com/lib/pq"
 )
 

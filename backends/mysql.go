@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	// dear gofmt, this is needed
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kmulvey/gen-gorm/graph"
 	"github.com/kmulvey/gen-gorm/util"
