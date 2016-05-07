@@ -7,6 +7,7 @@ Generate a gorm model from an existing sql database.
 
 [Help wanted](https://github.com/kmulvey/gen-gorm/issues).
 
+[mysql test data](https://dev.mysql.com/doc/sakila/en/)
 
 ## License
 
