@@ -21,20 +21,20 @@ func TestGetTableInfoMysql(t *testing.T) {
 	tableRows := sqlmock.NewRows([]string{"table_name"}).
 		AddRow("users").
 		AddRow("posts")
-	colRows := sqlmock.NewRows([]string{"COLUMN_NAME", "DATA_TYPE", "COLUMN_KEY"}).
-		AddRow("id", "int", "PRI").
-		AddRow("name", "varchar", "")
+	colRows := sqlmock.NewRows([]string{"COLUMN_NAME", "DATA_TYPE", "CHARACTER_MAXIMUM_LENGTH", "EXTRA", "COLUMN_KEY", "CONSTRAINT_TYPE"}).
+		AddRow("id", "int", nil, "", "PRI", "").
+		AddRow("name", "varchar", "45", "", "", "")
 	// you cant reuse mocked rows
-	colRowsTwo := sqlmock.NewRows([]string{"COLUMN_NAME", "DATA_TYPE", "COLUMN_KEY"}).
-		AddRow("id", "int", "PRI").
-		AddRow("name", "varchar", "").
-		AddRow("user_id", "int", "MUL")
+	colRowsTwo := sqlmock.NewRows([]string{"COLUMN_NAME", "DATA_TYPE", "CHARACTER_MAXIMUM_LENGTH", "EXTRA", "COLUMN_KEY", "CONSTRAINT_TYPE"}).
+		AddRow("id", "int", nil, "", "PRI", "").
+		AddRow("name", "varchar", "45", "", "", "").
+		AddRow("user_id", "int", nil, "", "MUL", "")
 	foreignKeys := sqlmock.NewRows([]string{"TABLE_NAME", "COLUMN_NAME", "REFERENCED_TABLE_NAME", "REFERENCED_COLUMN_NAME"}).
 		AddRow("posts", "user_id", "users", "id")
 
 	mock.ExpectQuery("SELECT table_name FROM information_schema.tables").WillReturnRows(tableRows)
-	mock.ExpectQuery("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE").WillReturnRows(colRows)
-	mock.ExpectQuery("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE").WillReturnRows(colRowsTwo)
+	mock.ExpectQuery("SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, EXTRA, COLUMN_KEY, CONSTRAINT_TYPE").WillReturnRows(colRows)
+	mock.ExpectQuery("SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, EXTRA, COLUMN_KEY, CONSTRAINT_TYPE").WillReturnRows(colRowsTwo)
 	mock.ExpectQuery("SELECT TABLE_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE").WillReturnRows(foreignKeys)
 	m := Mysql{}
 	s := "some_schema"

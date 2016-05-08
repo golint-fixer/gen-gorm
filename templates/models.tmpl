@@ -9,7 +9,7 @@ import (
 	type {{$v.Name}} struct {
 	gorm.Models
 	{{range $key, $c := $v.Cols}}
-		{{ $c.Name }} {{ $c.Type }}
+		{{ $c.Name }} {{ $c.Type }} {{ $c.GetMeta }}
 	{{- end}}
 
 	{{range $key, $e := $v.Edges}}

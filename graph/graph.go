@@ -1,5 +1,12 @@
 package graph
 
+import (
+	"database/sql"
+	"fmt"
+	"strconv"
+	"strings"
+)
+
 // Graph is a databse
 type Graph struct {
 	Vertices map[string]*Vertex
@@ -16,9 +23,12 @@ type Vertex struct {
 
 // Col is a column ... duh?!?
 type Col struct {
-	Name string
-	Type string
-	Key  string
+	Name       string
+	Type       string
+	MaxLen     sql.NullInt64
+	AutoInc    bool
+	Key        string
+	Constraint string
 }
 
 // Edge is a foreign key
@@ -26,4 +36,26 @@ type Edge struct {
 	DestinationTable *Vertex
 	DestinationCol   *Col
 	OriginCol        *Col
+}
+
+func (c Col) GetMeta() string {
+	// bail
+	if !c.MaxLen.Valid && !c.AutoInc && c.Constraint == "" || c.Constraint == "FOREIGN KEY" {
+		return ""
+	}
+	var result = "`gorm:"
+
+	if c.MaxLen.Valid {
+		result += "size:" + strconv.FormatInt(c.MaxLen.Int64, 10) + ";"
+	}
+	if c.Constraint != "" && c.Constraint != "FOREIGN KEY" {
+		result += c.Constraint + ";"
+	}
+	if c.AutoInc {
+		result += `"AUTO_INCREMENT";`
+	}
+
+	result = strings.TrimRight(result, ";")
+	fmt.Println(result + "`")
+	return result + "`"
 }

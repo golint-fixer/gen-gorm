@@ -3,6 +3,7 @@ package backends
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	// dear gofmt, this is needed
 	_ "github.com/go-sql-driver/mysql"
@@ -43,16 +44,23 @@ func (m *Mysql) createModel(conn *sql.DB, config ConnConfig) (database graph.Gra
 		table.Name = formatColName(tableName)
 		// get column information
 		var cols = make(map[string]graph.Col)
-		columns, err := conn.Query("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name=? AND table_schema=?", tableName, *config.Schema)
+		columns, err := conn.Query("SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, EXTRA, COLUMN_KEY, CONSTRAINT_TYPE FROM INFORMATION_SCHEMA.COLUMNS c inner join INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc on c.table_schema=tc.table_schema and c.table_name=tc.table_name WHERE c.table_name=? AND c.table_schema=?", tableName, *config.Schema)
 		util.HandleErr(err)
 
 		for columns.Next() {
 			var colName string
 			var colType string
+			var colMaxLen sql.NullInt64
+			var colExtra string
 			var colKey string
-			err = columns.Scan(&colName, &colType, &colKey)
+			var conType string
+			err = columns.Scan(&colName, &colType, &colMaxLen, &colExtra, &colKey, &conType)
 			util.HandleErr(err)
-			cols[formatColName(colName)] = graph.Col{Name: formatColName(colName), Type: convertType(colType), Key: colKey}
+			var autoInc bool
+			if strings.Contains(colExtra, "auto_increment") {
+				autoInc = true
+			}
+			cols[formatColName(colName)] = graph.Col{Name: formatColName(colName), Type: convertType(colType), MaxLen: colMaxLen, AutoInc: autoInc, Key: colKey, Constraint: conType}
 		}
 		table.Cols = cols
 		database.Vertices[formatColName(tableName)] = table
