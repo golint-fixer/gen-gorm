@@ -19,7 +19,6 @@ script:
   - go test -v -parallel 10 -covermode=count -coverprofile=util.coverage.out -coverpkg=./util
   - go test -v -parallel 10 -covermode=count -coverprofile=backends.coverage.out -coverpkg=./backends
   - ./coverage.sh
-  - cat coverage.out
 
 after_success:
-  - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken WVURXfIfQnohf4flfYJfa3haa9hwGwhU2
+  #  - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken WVURXfIfQnohf4flfYJfa3haa9hwGwhU2
