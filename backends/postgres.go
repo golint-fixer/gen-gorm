@@ -46,21 +46,26 @@ func (m *Postgres) createModel(conn *sql.DB, config ConnConfig) (database graph.
 		table.Name = formatColName(tableName)
 		// get column information
 		var cols = make(map[string]graph.Col)
-		columns, err := conn.Query("select kc.column_name, c.data_type, tc.constraint_type from information_schema.table_constraints tc inner join information_schema.key_column_usage kc on kc.table_name = tc.table_name and kc.table_schema = tc.table_schema inner join information_schema.columns c on kc.column_name=c.column_name where tc.table_name=$1 and tc.table_catalog=$2", tableName, *config.Schema)
+		columns, err := conn.Query("select kc.column_name, c.data_type, c.character_maximum_length, tc.constraint_type from information_schema.table_constraints tc inner join information_schema.key_column_usage kc on kc.table_name = tc.table_name and kc.table_schema = tc.table_schema inner join information_schema.columns c on kc.column_name=c.column_name where tc.table_name=$1 and tc.table_catalog=$2", tableName, *config.Schema)
 		util.HandleErr(err)
 
 		for columns.Next() {
 			var colName string
 			var colType string
+			var colMaxLen sql.NullInt64
 			var colKey string
-			err = columns.Scan(&colName, &colType, &colKey)
+			err = columns.Scan(&colName, &colType, &colMaxLen, &colKey)
 			util.HandleErr(err)
-			cols[formatColName(colName)] = graph.Col{Name: formatColName(colName), Type: convertType(colType), Key: colKey}
+			if colKey == "FOREIGN KEY" {
+				colKey = "MULTIPLE"
+			}
+			cols[formatColName(colName)] = graph.Col{Name: formatColName(colName), Type: convertType(colType), Key: colKey, MaxLen: colMaxLen}
 		}
 		table.Cols = cols
 		database.Vertices[formatColName(tableName)] = table
 	}
 	// get foreign key information
+	//tc.constraint_type,
 	keys, err := conn.Query(`select 
 		tc.table_name,
 		kcu.column_name,
@@ -86,6 +91,7 @@ func (m *Postgres) createModel(conn *sql.DB, config ConnConfig) (database graph.
 	for keys.Next() {
 		var tableName string
 		var colName string
+		//var constraintType string
 		var refTableName string
 		var refColName string
 
@@ -96,7 +102,7 @@ func (m *Postgres) createModel(conn *sql.DB, config ConnConfig) (database graph.
 		var destTable = database.Vertices[formatColName(refTableName)]
 		var originKey = originTable.Cols[formatColName(colName)].Key
 
-		if originKey == "FOREIGN KEY" {
+		if originKey == "MULTIPLE" {
 			destTable.HasMany = originTable.Name
 		}
 
@@ -104,6 +110,7 @@ func (m *Postgres) createModel(conn *sql.DB, config ConnConfig) (database graph.
 		oC := originTable.Cols[formatColName(colName)]
 		var e = graph.Edge{DestinationTable: destTable, DestinationCol: &dC, OriginCol: &oC}
 		originTable.Edges = append(originTable.Edges, e)
+		fmt.Println(originTable.Edges[0].DestinationTable.HasMany)
 	}
 	return database
 }
