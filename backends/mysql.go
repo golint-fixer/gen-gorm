@@ -18,7 +18,7 @@ type Mysql struct {
 	model graph.Graph
 }
 
-// createConn
+// createConn creates a connection. This cannot be unit tested
 func (m *Mysql) createConn(config ConnConfig) *sql.DB {
 	conn, err := sql.Open("mysql", fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8", *config.Username, *config.Password, *config.Hostname, *config.Port, *config.Schema))
 	util.HandleErr(err)

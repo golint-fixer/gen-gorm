@@ -18,7 +18,7 @@ type Postgres struct {
 	model graph.Graph
 }
 
-// createConn
+// createConn creates a connection. This cannot be unit tested
 func (m *Postgres) createConn(config ConnConfig) *sql.DB {
 	conn, err := sql.Open("postgres", fmt.Sprintf("host=%v user=%v dbname=%v password=%v port=%v sslmode=disable", *config.Hostname, *config.Username, *config.Schema, *config.Password, *config.Port))
 	if err != nil {

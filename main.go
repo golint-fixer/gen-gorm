@@ -21,6 +21,7 @@ type table struct {
 	Cols      []column
 }
 
+// cant really unit test a main()
 func main() {
 	var dbConfig = backends.ConnConfig{
 		Hostname: flag.String("hostname", "", "hostname"),
@@ -34,7 +35,7 @@ func main() {
 	flag.Parse()
 
 	// get table structure from DB
-	data := backends.GetTableInfo(dbConfig, *engine)
+	data := backends.BackendFactory(dbConfig, *engine)
 
 	// get 'er done
 	processTemplates(data, *output)

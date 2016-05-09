@@ -23,8 +23,8 @@ type ConnConfig struct {
 	Port     *string
 }
 
-// GetTableInfo generates the model using the correct engine
-func GetTableInfo(config ConnConfig, engine string) graph.Graph {
+// BackendFactory selects the correct engine and generates the model. This should not be unit tested.
+func BackendFactory(config ConnConfig, engine string) graph.Graph {
 	switch engine {
 	case "mysql":
 		m := Mysql{}
