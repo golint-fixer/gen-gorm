@@ -110,7 +110,6 @@ func (m *Postgres) createModel(conn *sql.DB, config ConnConfig) (database graph.
 		oC := originTable.Cols[formatColName(colName)]
 		var e = graph.Edge{DestinationTable: destTable, DestinationCol: &dC, OriginCol: &oC}
 		originTable.Edges = append(originTable.Edges, e)
-		fmt.Println(originTable.Edges[0].DestinationTable.HasMany)
 	}
 	return database
 }

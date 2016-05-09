@@ -39,7 +39,6 @@ func TestGetTableInfoPostgres(t *testing.T) {
 	p := Postgres{}
 	s, u := "some_schema", "adama"
 	c := ConnConfig{Schema: &s, Username: &u}
-	fmt.Println(database.Vertices["Posts"].Edges[0].DestinationTable.HasMany)
 	data := p.createModel(db, c)
 	assert.Equal(t, database, data, "should be equal")
 }
