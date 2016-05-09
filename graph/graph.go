@@ -2,7 +2,6 @@ package graph
 
 import (
 	"database/sql"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -56,6 +55,5 @@ func (c Col) GetMeta() string {
 	}
 
 	result = strings.TrimRight(result, ";")
-	fmt.Println(result + "`")
 	return result + "`"
 }
