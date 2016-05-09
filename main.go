@@ -6,12 +6,9 @@ import (
 	"os"
 	"os/exec"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/kmulvey/gen-gorm/backends"
 	"github.com/kmulvey/gen-gorm/graph"
 	"github.com/kmulvey/gen-gorm/util"
-
-	_ "github.com/lib/pq"
 )
 
 type column struct {
