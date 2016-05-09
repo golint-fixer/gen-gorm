@@ -60,6 +60,9 @@ func (m *Mysql) createModel(conn *sql.DB, config ConnConfig) (database graph.Gra
 			if strings.Contains(colExtra, "auto_increment") {
 				autoInc = true
 			}
+			if colKey == "MUL" {
+				colKey = "MULTIPLE"
+			}
 			cols[formatColName(colName)] = graph.Col{Name: formatColName(colName), Type: convertType(colType), MaxLen: colMaxLen, AutoInc: autoInc, Key: colKey, Constraint: conType}
 		}
 		table.Cols = cols
@@ -81,7 +84,7 @@ func (m *Mysql) createModel(conn *sql.DB, config ConnConfig) (database graph.Gra
 		var destTable = database.Vertices[formatColName(refTableName)]
 		var originKey = originTable.Cols[formatColName(colName)].Key
 
-		if originKey == "MUL" {
+		if originKey == "MULTIPLE" {
 			destTable.HasMany = originTable.Name
 		}
 
