@@ -37,6 +37,7 @@ type Edge struct {
 	OriginCol        *Col
 }
 
+// GetMeta generates the gorm meta string
 func (c Col) GetMeta() string {
 	// bail
 	if !c.MaxLen.Valid && !c.AutoInc && c.Constraint == "" || c.Constraint == "FOREIGN KEY" {
