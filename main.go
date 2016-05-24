@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"html/template"
 	"os"
 	"os/exec"
+	"text/template"
 
 	"github.com/kmulvey/gen-gorm/backends"
 	"github.com/kmulvey/gen-gorm/graph"
