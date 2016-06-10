@@ -39,21 +39,27 @@ var queryType = graphql.NewObject(
 		Name: "Query",
 		Fields: graphql.Fields{
 		{{range $key, $v := .Vertices}}
-				"{{ $v.Name | ToLower }}": &graphql.Field{
-					Type: {{ $v.Name }}Type,
+				"{{ $v.Name | Singularize | ToLower }}": &graphql.Field{
+					Type: graphql.NewList({{ $v.Name | Singularize | ToLower }}Type),
 					Args: graphql.FieldConfigArgument{
 					{{range $key, $c := $v.Cols}}
-						"{{ $c.Name | ToLower }}": &graphql.ArgumentConfig{
-							Type: graphql.{{ $c.Type | CapFirst }},
-						},
+						{{ if ($c.HasEdge $v.Edges) eq true }}
+							"{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }}": &graphql.ArgumentConfig{
+							Type: {{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }}Type,
+							},
+						{{ else }}
+							"{{ $c.Name | ToLower }}": &graphql.ArgumentConfig{
+								Type: graphql.{{ $c.Type | CapFirst }},
+							},
+						{{- end}}
 					{{- end}}
 					},
 					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 						db := getDB()
-						{{ $v.Name | ToLower }} := []{{ $v.Name }}{}
+						{{ $v.Name | Singularize | ToLower }} := []models.{{ $v.Name | Singularize }}{}
 						db.LogMode(true)
-						db.Where(p.Args).Find(&{{ $v.Name | ToLower }})
-						return {{ $v.Name | ToLower }}, nil
+						db.Where(p.Args).Find(&{{ $v.Name | Singularize | ToLower }})
+						return {{ $v.Name | Singularize | ToLower }}, nil
 					},
 				},
 			{{end}}
