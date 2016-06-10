@@ -66,9 +66,10 @@ func (c Col) GetMeta() string {
 	return result + "`"
 }
 
+// GetEdge returns a column's edge counterpart
 func (c Col) GetEdge(edges []Edge) (result Edge) {
 	for _, e := range edges {
-		if reflect.DeepEqual(e.OriginCol, &c) {
+		if reflect.DeepEqual(e.OriginCol, &c) { // a custom == func could remove reflect
 			result = e
 			_ = "breakpoint"
 		}
@@ -76,6 +77,7 @@ func (c Col) GetEdge(edges []Edge) (result Edge) {
 	return result
 }
 
+// HasEdge returns true if a column has an edge counterpart
 func (c Col) HasEdge(edges []Edge) bool {
 	for _, e := range edges {
 		if e.OriginCol.Name == c.Name { // not good
