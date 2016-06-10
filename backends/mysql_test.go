@@ -22,11 +22,11 @@ func TestGetTableInfoMysql(t *testing.T) {
 		AddRow("users").
 		AddRow("posts")
 	colRows := sqlmock.NewRows([]string{"COLUMN_NAME", "DATA_TYPE", "CHARACTER_MAXIMUM_LENGTH", "EXTRA", "COLUMN_KEY"}).
-		AddRow("id", "int", nil, "", "primary_key").
+		AddRow("id", "int", nil, "", "PRI").
 		AddRow("name", "varchar", "45", "", "")
 	// you cant reuse mocked rows
 	colRowsTwo := sqlmock.NewRows([]string{"COLUMN_NAME", "DATA_TYPE", "CHARACTER_MAXIMUM_LENGTH", "EXTRA", "COLUMN_KEY"}).
-		AddRow("id", "int", nil, "", "primary_key").
+		AddRow("id", "int", nil, "", "PRI").
 		AddRow("name", "varchar", "45", "", "").
 		AddRow("user_id", "int", nil, "", "MUL")
 	foreignKeys := sqlmock.NewRows([]string{"TABLE_NAME", "COLUMN_NAME", "REFERENCED_TABLE_NAME", "REFERENCED_COLUMN_NAME"}).
