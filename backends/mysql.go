@@ -44,7 +44,14 @@ func (m *Mysql) createModel(conn *sql.DB, config ConnConfig) (database graph.Gra
 		table.Name = formatColName(tableName)
 		// get column information
 		var cols = make(map[string]graph.Col)
-		columns, err := conn.Query("SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, EXTRA, COLUMN_KEY, CONSTRAINT_TYPE FROM INFORMATION_SCHEMA.COLUMNS c inner join INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc on c.table_schema=tc.table_schema and c.table_name=tc.table_name WHERE c.table_name=? AND c.table_schema=?", tableName, *config.Schema)
+		columns, err := conn.Query("SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, EXTRA, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS c inner join INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc on c.table_schema=tc.table_schema and c.table_name=tc.table_name WHERE c.table_name=? AND c.table_schema=?", tableName, *config.Schema)
+		// might be better for constrains
+		// SELECT non_unique, index_name, seq_in_index, column_name
+		// FROM INFORMATION_SCHEMA.STATISTICS
+		// WHERE table_name = 'entitlement'
+		// AND table_schema = 'auth_service'
+		// order by index_name, seq_in_index
+
 		util.HandleErr(err)
 
 		for columns.Next() {
@@ -53,8 +60,8 @@ func (m *Mysql) createModel(conn *sql.DB, config ConnConfig) (database graph.Gra
 			var colMaxLen sql.NullInt64
 			var colExtra string
 			var colKey string
-			var conType string
-			err = columns.Scan(&colName, &colType, &colMaxLen, &colExtra, &colKey, &conType)
+			//var conType string
+			err = columns.Scan(&colName, &colType, &colMaxLen, &colExtra, &colKey)
 			util.HandleErr(err)
 			var autoInc bool
 			if strings.Contains(colExtra, "auto_increment") {
@@ -62,8 +69,10 @@ func (m *Mysql) createModel(conn *sql.DB, config ConnConfig) (database graph.Gra
 			}
 			if colKey == "MUL" {
 				colKey = "MULTIPLE"
+			} else if colKey == "PRI" {
+				colKey = "primary_key"
 			}
-			cols[formatColName(colName)] = graph.Col{Name: formatColName(colName), Type: convertType(colType), MaxLen: colMaxLen, AutoInc: autoInc, Key: colKey, Constraint: conType}
+			cols[formatColName(colName)] = graph.Col{Name: formatColName(colName), Type: convertType(colType), MaxLen: colMaxLen, AutoInc: autoInc, Key: colKey}
 		}
 		table.Cols = cols
 		database.Vertices[formatColName(tableName)] = table
