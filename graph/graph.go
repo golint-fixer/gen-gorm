@@ -2,6 +2,7 @@ package graph
 
 import (
 	"database/sql"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -63,4 +64,23 @@ func (c Col) GetMeta() string {
 
 	result = strings.TrimRight(result, ";")
 	return result + "`"
+}
+
+func (c Col) GetEdge(edges []Edge) (result Edge) {
+	for _, e := range edges {
+		if reflect.DeepEqual(e.OriginCol, &c) {
+			result = e
+			_ = "breakpoint"
+		}
+	}
+	return result
+}
+
+func (c Col) HasEdge(edges []Edge) bool {
+	for _, e := range edges {
+		if e.OriginCol.Name == c.Name { // not good
+			return true
+		}
+	}
+	return false
 }
