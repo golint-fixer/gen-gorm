@@ -58,6 +58,8 @@ func (m *Postgres) createModel(conn *sql.DB, config ConnConfig) (database graph.
 			util.HandleErr(err)
 			if colKey == "FOREIGN KEY" {
 				colKey = "MULTIPLE"
+			} else if colKey == "PRI" {
+				colKey = "primary_key"
 			}
 			cols[formatColName(colName)] = graph.Col{Name: formatColName(colName), Type: convertType(colType), Key: colKey, MaxLen: colMaxLen}
 		}
