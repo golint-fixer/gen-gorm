@@ -51,6 +51,12 @@ func (c Col) GetMeta() string {
 	if c.Constraint != "" && c.Constraint != "FOREIGN KEY" {
 		result += c.Constraint + ";"
 	}
+
+	// index?
+	if c.Key != "" {
+		result += c.Key + " "
+	}
+
 	if c.AutoInc {
 		result += `"AUTO_INCREMENT";`
 	}

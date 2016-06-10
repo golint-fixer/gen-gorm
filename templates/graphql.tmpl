@@ -1,0 +1,61 @@
+package routes
+
+import (
+	"github.com/graphql-go/graphql"
+)
+
+{{range $key, $v := .Vertices}}
+	var {{ $v.Name | Singularize | ToLower }}Type = graphql.NewObject(
+		graphql.ObjectConfig{
+			Name: "{{ $v.Name | Singularize }}",
+			Fields: graphql.Fields{
+				{{range $key, $c := $v.Cols}}
+					{{ if ($c.HasEdge $v.Edges) eq true }}
+						"{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }}": &graphql.Field{
+						Type: {{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }}Type, {{/* sometimes need graphql.NewList() here */}}
+							Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+								db := getDB()
+								{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }} := models.{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize }}{} {{/* sometimes needs to be an array */}}
+								db.LogMode(true)
+								db.Where(&models.{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize }} { {{ ($c.GetEdge $v.Edges).DestinationCol.Name }}: p.Source.(models.{{ $v.Name | Singularize }}).{{ ($c.GetEdge $v.Edges).OriginCol.Name }}}).Find(&{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }})
+								return {{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }}, nil
+							},
+						},
+					{{ else }}
+					"{{ $c.Name | ToLower }}": &graphql.Field{
+						Type: graphql.String, {{/* need formatted type here e.g. String */}}
+						},
+					{{- end}}
+				{{- end}}
+			},
+		},
+	)
+{{end}}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+var queryType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "Query",
+		Fields: graphql.Fields{
+		{{range $key, $v := .Vertices}}
+				"{{ $v.Name | ToLower }}": &graphql.Field{
+					Type: {{ $v.Name }}Type,
+					Args: graphql.FieldConfigArgument{
+					{{range $key, $c := $v.Cols}}
+						"{{ $c.Name | ToLower }}": &graphql.ArgumentConfig{
+							Type: graphql.{{ $c.Type | CapFirst }},
+						},
+					{{- end}}
+					},
+					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+						db := getDB()
+						{{ $v.Name | ToLower }} := []{{ $v.Name }}{}
+						db.LogMode(true)
+						db.Where(p.Args).Find(&{{ $v.Name | ToLower }})
+						return {{ $v.Name | ToLower }}, nil
+					},
+				},
+			{{end}}
+		},
+	})
