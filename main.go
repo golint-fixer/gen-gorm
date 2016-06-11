@@ -56,8 +56,10 @@ func processTemplates(data graph.Graph, output string) {
 	}
 
 	// parse templates
-	modelsTemplate, err := template.ParseFiles("templates/models.tmpl")
+	modelsTemplate := template.New("models.tmpl").Funcs(funcMap)
+	_, err := modelsTemplate.ParseFiles("templates/models.tmpl")
 	util.HandleErr(err)
+
 	schemaTemplate := template.New("graphql.tmpl").Funcs(funcMap)
 	_, err = schemaTemplate.ParseFiles("templates/graphql.tmpl")
 	util.HandleErr(err)

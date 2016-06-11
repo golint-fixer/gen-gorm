@@ -6,7 +6,7 @@ import (
 
 
 {{range $key, $v := .Vertices}}
-	type {{$v.Name}} struct {
+	type {{$v.Name | Singularize }} struct {
 	gorm.Model
 	{{range $key, $c := $v.Cols}}
 		{{ $c.Name }} {{ $c.Type }} {{ $c.GetMeta }}

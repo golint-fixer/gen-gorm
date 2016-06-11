@@ -14,7 +14,7 @@ import (
 						"{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }}": &graphql.Field{
 						Type: {{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }}Type, {{/* sometimes need graphql.NewList() here */}}
 							Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-								db := getDB()
+								db := models.GetDB()
 								{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }} := models.{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize }}{} {{/* sometimes needs to be an array */}}
 								db.LogMode(true)
 								db.Where(&models.{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize }} { {{ ($c.GetEdge $v.Edges).DestinationCol.Name }}: p.Source.(models.{{ $v.Name | Singularize }}).{{ ($c.GetEdge $v.Edges).OriginCol.Name }}}).Find(&{{ ($c.GetEdge $v.Edges).DestinationTable.Name | Singularize | ToLower }})
@@ -55,7 +55,7 @@ var queryType = graphql.NewObject(
 					{{- end}}
 					},
 					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-						db := getDB()
+						db := models.GetDB()
 						{{ $v.Name | Singularize | ToLower }} := []models.{{ $v.Name | Singularize }}{}
 						db.LogMode(true)
 						db.Where(p.Args).Find(&{{ $v.Name | Singularize | ToLower }})
